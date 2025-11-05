@@ -1,8 +1,5 @@
 # Class Spread Syntax
 
-> [!NOTE]
-> This is a work in progress and not yet ready for review.
-
 ## Motivation
 
 Today, the spread syntax can be used to compose an object from multiple other objects of the same or similar type.
@@ -18,12 +15,16 @@ And for objects:
 const obj = { ...obj1, ...obj2 };
 ```
 
-But we don't have it for classes.
+But we don't have it for **classes**.
 
 This makes it hard to abstract class behavior out into separate modules,
-even in scenarios where class definitions can be cooperatively developed.
+even in scenarios where class definitions and such modules can be cooperatively developed.
 
-It also makes it hard to generate class API surface dynamically, without going back to dealing with prototypes.
+Lack of a mechanism for spreading within the class body means that the only way to add API surface dynamically is to go back to dealing with prototypes.
+
+Last, even if [`[[Fields]]` remain non-introspectable ](customizable-fields.md),
+a specialized class spread syntax could have access to them and take care of copying them over,
+something that userland code cannot do today.
 
 ## Proposal
 
