@@ -66,6 +66,10 @@ And with [customizable public class fields](customizable-fields.md), those can a
 B[Symbol.publicFields].push(...A[Symbol.publicFields]);
 ```
 
+Note that all of this can be applied to an existing class as well.
+Perhaps there could be a helper method to facilitate this, e.g. `Function.extend(Base, ...traits)`,
+with the spread syntax desugaring to it.
+
 Unlike [subclass factories](../prior-art.md#subclass-factories-mixins), the spread operator would not affect the inheritance chain, it is essentially a macro for adding class members (both instance and static).
 
 ### What is added and what is not added?
