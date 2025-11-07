@@ -618,4 +618,5 @@ And so on.
 Perhaps, instead of shipping a declarative syntax for some opinionated flavor of class partials upfront, we could instead start with shipping **low-level primitives** that allow authors to more easily and robustly implement the behaviors they want, making complex things possible, and leaving it up to userland abstractions to make them easy.
 Once enough patterns have emerged, we can later design a language-level syntax that makes simple things easy without the need for userland dependencies.
 
-Ideas around what primitives those might be are developed as separate files in the [proposals](proposals) directory.
+Ideas around what primitives those might be are developed as separate files in the [ideas](ideas) directory.
+More mature ideas may graduate to [proposals](proposals).

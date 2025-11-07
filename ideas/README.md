@@ -1,13 +1,7 @@
-# Class Partials Proposals
+# Class Partials Ideas
 
-Instead of shipping a declarative syntax for some flavor of class partials upfront, we could instead start with shipping low-level primitives that allow authors to more easily and robustly implement the behaviors they want.
-Once enough patterns have emerged, we can later design a language-level syntax that makes simple things easy.
-
-There are two components to addressing the requirements for class partials:
-1. **Low-level primitives**: Not directly related to partials, but can be used by userland code to better implement partials and later to desugar native syntax.
-2. **Class partials syntax**: What high-level syntax can be used to define and apply partials without the need for userland helpers?
-
-It seems that a good path forwards may be to start with the low-level primitives that allow authors to more easily and robustly implement the behaviors they want, and once enough patterns have emerged, we can later design a language-level syntax.
+This directory contains various ideas around features that could pave the way towards better userland and native class partials in some way.
+More mature ideas may graduate to [proposals](./proposals).
 
 The more mature proposals around that are:
 
