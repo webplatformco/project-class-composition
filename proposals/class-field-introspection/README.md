@@ -1,4 +1,4 @@
-# Class fields introspection
+# Class field introspection
 
 ## Status
 
