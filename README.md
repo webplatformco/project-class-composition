@@ -373,7 +373,7 @@ However this is orthogonal: regardless of _which_ functions are composed, the qu
 
 If lifecycle hooks are the main use case, perhaps function composition can be restricted to side effects, and subclassing could still be the recommended mechanism for overriding return values.
 
-Function composition is explored in depth in the [Mutable Functions](proposals/mutable-functions.md) proposal.
+Function composition is explored in depth in the [Mutable Functions](ideas/mutable-functions.md) proposal.
 
 ### Static introspection
 
