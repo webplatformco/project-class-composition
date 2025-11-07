@@ -1,4 +1,4 @@
-# Introspection of public [[Fields]]
+# Class fields introspection
 
 ## Status
 
