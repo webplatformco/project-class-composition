@@ -1,4 +1,4 @@
-# Class Partials
+# Class Composition
 
 Authors: Lea Verou
 
@@ -58,7 +58,7 @@ Authors: Lea Verou
 This document is currently an exploration of the problem and design space, and does not yet propose any specific solution.
 
 > [!NOTE]
-> To avoid assumptions about specific patterns, this document avoids using terms like _mixins_, _traits_, _protocols_, etc. and instead uses the more general term _partials_ which is meant to encompass all of them.
+> To avoid assumptions about specific patterns, this document avoids using terms like _mixins_, _traits_, _protocols_, _interfaces_, etc. and instead uses the relatively unused term _partials_ which is meant to encompass all of them.
 
 ## Use cases
 
