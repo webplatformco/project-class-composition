@@ -63,7 +63,7 @@ This document is currently an exploration of the problem- and design- space, and
 
 The limitations of single-inheritance are well established.
 
-On a high level, there are two distinct axes of use cases with different requirements:
+On a high level, there are three distinct axes of use cases with different requirements:
 
 * **Degree of coupling**: Between the behavior, the class, and the code applying the behavior to the class. This ranges from the same entity developing all three and seeking to simply reduce knowledge duplication (_cooperative partials_), to completely decoupled development where all three are developed independently by different entities (_decoupled traits_).
 * **Abstractness**: Does the partial require any API surface from the implementing class (essentially as input to parameterize it), or does it provide all the API surface it needs?
