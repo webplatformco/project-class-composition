@@ -263,6 +263,44 @@
 		<h2>Userland patterns</h2>
 	</header>
 
+	<article class="slide columns-2">
+		<h3>Example going forwards</h3>
+
+		<img src="images/shape.svg" alt="Shape">
+
+		<ul class="md-children">
+			<li>Host class: `EquilateralTriangle`
+			<li>Superclass: `Triangle`
+			<li>Mixin: `EquilateralShape` with a `getArea()` method that implements the formula:
+			<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+				<mrow>
+					<mi>A</mi>
+					<mo>=</mo>
+					<mfrac>
+						<mrow>
+							<mi>n</mi>
+							<msup>
+								<mi>s</mi>
+								<mn>2</mn>
+							</msup>
+						</mrow>
+						<mrow>
+							<mn>4</mn>
+							<mo>&InvisibleTimes;</mo>
+							<mi>tan</mi>
+							<mfenced>
+								<mfrac>
+									<mi>&pi;</mi>
+									<mi>n</mi>
+								</mfrac>
+							</mfenced>
+						</mrow>
+					</mfrac>
+				</mrow>
+			</math>
+		</div>
+	</article>
+
 	<article class="slide">
 		<h3>Subclass factories</h3>
 
@@ -629,11 +667,28 @@
 		<h2>Class spread syntax</h2>
 	</header>
 
-	<article class="slide md">
-		### Core idea
+	<article class="slide columns-2">
+		<h3>Core idea</h3>
 
-		- Bring spread syntax to class definitions
-		- Low-level semantics, no-one expects sophisticated MRO
+
+		<div>
+			<pre class="yes"><code>const arr = [...arr1, ...arr2];</code></pre>
+
+			<pre class="yes"><code>console.log(...iterable);</code></pre>
+
+			<pre class="yes"><code>const obj = { ...obj1, ...obj2 };</code></pre>
+
+			<pre class="no"><code>
+				class A extends B {
+					...M1
+				}
+			</code></pre>
+		</div>
+
+		<ul>
+			<li>Like object spread, but copies descriptors</li>
+			<li class="pro">Low-level semantics, no-one expects sophisticated MRO</li>
+		</ul>
 	</article>
 
 	<article class="slide">
