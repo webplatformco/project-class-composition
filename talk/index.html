@@ -271,7 +271,7 @@
 		<ul class="md-children">
 			<li>Host class: `EquilateralTriangle`
 			<li>Superclass: `Triangle`
-			<li>Mixin: `EquilateralShape` with a `getArea()` method that implements the formula:
+			<li>Mixin: `RegularPolygon` with a `getArea()` method that implements the formula:
 			<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
 				<mrow>
 					<mi>A</mi>
@@ -306,7 +306,7 @@
 
 		<div class="sbs">
 			<pre class="language-javascript"><code>
-				const EquilateralShape = S => class EquilateralShape extends S {
+				const RegularPolygon = S => class RegularPolygon extends S {
 					getArea () {
 						const {sideLength, sides} = this;
 						return sides * sideLength ** 2 /
@@ -314,7 +314,7 @@
 					}
 				}
 
-				class EquilateralTriangle extends EquilateralShape(Triangle) {
+				class EquilateralTriangle extends RegularPolygon(Triangle) {
 					sides = 3;
 
 					constructor (sideLength) {
@@ -340,7 +340,7 @@
 
 		<div class="sbs">
 			<pre class="language-javascript"><code>
-				class EquilateralShape {
+				class RegularPolygon {
 					constructor (sideLength, sides) {
 						this.sideLength = sideLength;
 						this.sides = sides;
@@ -354,14 +354,14 @@
 				}
 
 				class EquilateralTriangle extends Triangle {
-					#equilateralShape = new EquilateralShape();
+					#RegularPolygon = new RegularPolygon();
 					constructor() {
 						this.sideLength = sideLength;
 					}
 
 					// Glue code
 					getArea () {
-						return this.#equilateralShape.getArea();
+						return this.#RegularPolygon.getArea();
 					}
 				}
 			</code></pre>
@@ -380,7 +380,7 @@
 
 		<div class="sbs">
 			<pre class="language-javascript"><code>
-				const EquilateralShape = {
+				const RegularPolygon = {
 					getArea () {
 						const {sideLength, sides} = this;
 						return sides * sideLength ** 2 /
@@ -397,7 +397,7 @@
 					}
 				}
 
-				Object.assign(EquilateralTriangle.prototype, EquilateralShape);
+				Object.assign(EquilateralTriangle.prototype, RegularPolygon);
 
 				(new EquilateralTriangle(4)).getArea(); // 6.93
 			</code></pre>
@@ -416,7 +416,7 @@
 
 		<div class="sbs">
 			<pre class="language-javascript"><code>
-				const EquilateralShape = {
+				const RegularPolygon = {
 					getArea () {
 						const {sideLength, sides} = this;
 						return sides * sideLength ** 2 /
@@ -430,7 +430,7 @@
 					constructor (sideLength) {
 						super(sideLength, sideLength, sideLength);
 						this.sideLength = sideLength;
-						Object.assign(this, EquilateralShape);
+						Object.assign(this, RegularPolygon);
 					}
 				}
 
@@ -460,31 +460,31 @@
 
 		<div class="sbs">
 			<pre class="language-javascript"><code>
-				protocol EquilateralShape {
+				protocol RegularPolygon {
 					sideLength;
 					sides;
 
 					getArea () {
-						let sides = this[EquilateralShape.sides];
-						let sideLength = this[EquilateralShape.sideLength];
+						let sides = this[RegularPolygon.sides];
+						let sideLength = this[RegularPolygon.sideLength];
 						return sides * sideLength ** 2 /
 						       (4 * Math.tan(Math.PI / sides));
 					}
 				}
 
 				class EquilateralTriangle extends Triangle {
-					[EquilateralShape.sides] = 3;
+					[RegularPolygon.sides] = 3;
 
 					constructor (sideLength) {
 						super(sideLength, sideLength, sideLength);
-						this[EquilateralShape.sideLength] = sideLength;
+						this[RegularPolygon.sideLength] = sideLength;
 					}
 
 					getArea () {
-						return this[EquilateralShape.getArea]();
+						return this[RegularPolygon.getArea]();
 					}
 				}
-				Protocol.implement(EquilateralTriangle, EquilateralShape);
+				Protocol.implement(EquilateralTriangle, RegularPolygon);
 
 				(new EquilateralTriangle(4)).getArea(); // 6.93
 			</code></pre>
@@ -507,7 +507,7 @@
 
 		<div class="sbs">
 			<pre class="language-javascript"><code>
-				mixin EquilateralShape {
+				mixin RegularPolygon {
 					getArea () {
 						const {sideLength, sides} = this;
 						return sides * sideLength ** 2 /
@@ -515,7 +515,7 @@
 					}
 				}
 
-				class EquilateralTriangle extends Triangle with EquilateralShape {
+				class EquilateralTriangle extends Triangle with RegularPolygon {
 					sides = 3;
 
 					constructor (sideLength) {
@@ -545,7 +545,7 @@
 
 		<div class="sbs">
 			<pre class="language-javascript"><code>
-				@EquilateralShape
+				@RegularPolygon
 				class EquilateralTriangle extends Triangle {
 					sides = 3;
 
@@ -566,7 +566,7 @@
 
 		<div class="sbs">
 			<pre class="language-javascript"><code>
-				function EquilateralShape (Class, context) {
+				function RegularPolygon (Class, context) {
 					return class extends Class {
 						getArea () {
 							if (super.getArea) {
@@ -581,7 +581,7 @@
 				}
 			</code></pre>
 			<pre class="language-javascript delayed" data-index="1"><code>
-				function EquilateralShape (Class, context) {
+				function RegularPolygon (Class, context) {
 					Class.prototype.getArea = function() {
 						const {sideLength, sides} = this;
 						return sides * sideLength ** 2 /
@@ -698,7 +698,7 @@
 		</header>
 
 		<pre class="language-javascript"><code>
-			class EquilateralShape {
+			class RegularPolygon {
 				getArea () {
 					const {sideLength, sides} = this;
 					return sides * sideLength ** 2 /
@@ -714,7 +714,7 @@
 					this.sideLength = sideLength;
 				}
 
-				...EquilateralShape
+				...RegularPolygon
 			}
 
 			(new EquilateralTriangle(4)).getArea(); // 6.93
