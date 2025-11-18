@@ -1,0 +1,18 @@
+@import url("/talks/common/theme.css") layer(theme);
+@import url("/talks/common/css/utils.css") layer(utils);
+
+#cover {
+	h1 {
+		font-size: calc(4 * var(--slide-base-font-size, 1rem));
+	}
+}
+
+.slide > h3 ~ section > h4 {
+	font-size: calc(2 * var(--slide-base-font-size, 1rem));
+	margin-block-start: 0;
+}
+
+
+.emoji {
+	font-size: calc(4 * var(--slide-base-font-size, 1rem));
+}

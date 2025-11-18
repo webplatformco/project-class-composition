@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Control Over Image Animation</title>
+	<link rel="shortcut icon" href="/talks/common/assets/logo.svg">
+	<script src="/talks/common/talk.js" type="module"></script>
+	<link rel="stylesheet" href="talk.css">
+</head>
+<body data-markdown-elements=".md, .md-children > :not(.no-md)" class="language-javascript">
+
+<header class="slide" id="cover">
+	<h1>
+		Class composition
+	</h1>
+	<h2>Past, present, and future</h2>
+	<footer>
+		Lea Verou (OpenJS)
+	</footer>
+</header>
+
+<article class="slide md">
+	## ⚠️ Work In progress ⚠️
+
+	These slides are a work in progress.
+	They will change, likely dramatically.
+	They're pushed to the repo for collaboration, not dissemnination.
+</article>
+
+<article class="slide md">
+	## Needs
+
+	- Modularity
+	- Better data modeling (_is a_ vs. _has a_)
+	- Coupling: Tightly vs. loosely coupled
+	- Type: Identity vs. trait/behavior
+
+	<details class="notes md">
+		The use cases for multiple inheritance are well-established in the literature.
+		On a high level, there are two distinct high-level needs:
+		- Modularity for class definitions. Procedural APIs can be broken down into multiple modules, but the story is not quite as smooth for class surface.
+		- Better data modeling: Support modeling _has a_ or _does a_ relationships distinctly from _is a_ relationships.
+	</details>
+</article>
+
+<article class="slide md">
+	## Variables
+
+	- What: State vs logic composition (+ 💠 Diamond problem)
+	- 🕒 When: Class definition time vs. post-hoc vs. instance creation time
+	- ✅ Contract: Requirements from host class
+</article>
+
+<section>
+	<header class="slide">
+		<h2>Composition across languages</h2>
+	</header>
+
+	<article class="slide columns-3">
+		<h3>Full-on Multiple inheritance</h3>
+		<section>
+			<h4>Python</h4>
+			<pre class="language-python"><code>
+				class M1:
+					def foo(self): print("M1")
+
+				# M2, M3 elided
+
+				class A(M1, M2, M3):
+					pass
+			</code></pre>
+		</section>
+		<section>
+			<h4>C++</h4>
+			<pre class="language-cpp"><code>
+				class M1 {
+				public:
+					void foo() { std::cout << "M1"; }
+				};
+
+				// M2, M3 elided
+
+				class A : public M1,
+				          public M2,
+				          public M3 {
+					// ...
+				};
+			</code></pre>
+		</section>
+		<section>
+			<h4>Eiffel</h4>
+			<pre class="language-eiffel"><code>
+				class M1
+					feature foo do print("M1") end
+				end
+
+				-- M2, M3 elided
+
+				class A inherit M1 M2 M3
+					-- ...
+				end
+			</code></pre>
+		</section>
+	</article>
+
+	<article class="slide columns-3">
+		<h3>Interfaces</h3>
+		<section>
+			<h4>Java 8+</h4>
+			<pre class="language-java"><code>
+				interface M1 {
+					default void foo() {
+						System.out.println("M1");
+					}
+				}
+
+				// M2, M3 elided
+
+				class A extends B implements M1, M2, M3 {
+					// ...
+				}
+			</code></pre>
+		</section>
+		<section>
+			<h4>C#</h4>
+			<pre class="language-csharp"><code>
+				interface M1 {
+					void foo() { Console.WriteLine("M1"); }
+				}
+
+				// M2, M3 elided
+
+
+				class A extends B implements M1, M2, M3 {
+					// ...
+				}
+			</code></pre>
+		</section>
+		<section>
+			<h4>Kotlin</h4>
+			<pre class="language-kotlin"><code>
+				interface M1 {
+					fun foo() { println("M1"); }
+				}
+
+				// M2, M3 elided
+
+				class A : B(), M1, M2, M3 {
+					// ...
+				}
+			</code></pre>
+		</section>
+	</article>
+
+	<article class="slide columns-3">
+		<h3>Mixins</h3>
+
+		<section>
+			<h4>Ruby</h4>
+			<pre class="language-ruby"><code>
+				module M1
+					def foo
+						puts "M1"
+					end
+				end
+
+				# M2, M3 elided
+
+				class A < B
+					include M1
+					include M2
+					include M3
+				end
+			</code></pre>
+		</section>
+		<section>
+			<h4>Dart</h4>
+			<pre class="language-dart"><code>
+				mixin M1 {
+					void foo() { print("M1"); }
+				}
+
+				// M2, M3 elided
+
+				class A extends B with M1, M2, M3 {
+					// ...
+				}
+			</code></pre>
+		</section>
+		<section>
+			<h4>Groovy</h4>
+			<pre class="language-groovy"><code>
+				class M1 {
+					def foo() { println "M1" }
+				}
+
+				// M2, M3 elided
+
+				class A extends B {}
+
+				A.metaClass.mixin M1, M2, M3
+			</code></pre>
+		</section>
+	</article>
+
+	<article class="slide columns-3">
+		<h3>Traits</h3>
+		<section>
+			<h4>PHP</h4>
+			<pre class="language-php"><code>
+				trait M1 {
+					public function foo() {
+						echo "M1";
+					}
+				}
+
+				// M2, M3 elided
+
+				class A extends B {
+					use M1, M2, M3;
+					// ...
+				}
+			</code></pre>
+		</section>
+		<section>
+			<h4>Scala</h4>
+			<pre class="language-swift"><code>
+				trait M1 {
+					def foo: String = "M1"
+				}
+
+				// M2, M3 elided
+
+				class A extends B with M1 with M2 with M3 {
+					// ...
+				}
+			</code></pre>
+		</section>
+		<section>
+			<h4>Rust</h4>
+			<pre class="language-rust"><code>
+				pub trait M1 {
+					fn foo(&self) { println!("M1"); }
+				}
+
+				// M2, M3 elided
+
+				// no way to do extends B,
+				// only composition or delegation
+				struct A;
+
+				impl M1 for A {}
+				impl M2 for A {}
+				impl M3 for A {}
+			</code></pre>
+		</section>
+	</article>
+</section>
+
+<section>
+	<header class="slide">
+		<h2>Userland patterns</h2>
+	</header>
+
+	<article class="slide">
+		<h3>Subclass factories</h3>
+
+		<div class="sbs">
+			<pre class="language-javascript"><code>
+				const EquilateralShape = S => class EquilateralShape extends S {
+					getArea () {
+						const {sideLength, sides} = this;
+						return sides * sideLength ** 2 /
+						       (4 * Math.tan(Math.PI / sides));
+					}
+				}
+
+				class EquilateralTriangle extends EquilateralShape(Triangle) {
+					sides = 3;
+
+					constructor (sideLength) {
+						super(sideLength, sideLength, sideLength);
+						this.sideLength = sideLength;
+					}
+				}
+
+				(new EquilateralTriangle(4)).getArea(); // 6.93
+			</code></pre>
+
+			<ul>
+				<li class="pro"><code>super</code> works</li>
+				<li class="yes">Private members</li>
+				<li class="con">Affects inheritance chain</li>
+				<li class="no">No <code>instanceof</code> checks</li>
+			</ul>
+		</div>
+	</article>
+
+	<article class="slide">
+		<h3>Delegation pattern</h3>
+
+		<div class="sbs">
+			<pre class="language-javascript"><code>
+				class EquilateralShape {
+					constructor (sideLength, sides) {
+						this.sideLength = sideLength;
+						this.sides = sides;
+					}
+
+					getArea () {
+						const {sideLength, sides} = this;
+						return sides * sideLength ** 2 /
+						       (4 * Math.tan(Math.PI / sides));
+					}
+				}
+
+				class EquilateralTriangle extends Triangle {
+					#equilateralShape = new EquilateralShape();
+					constructor() {
+						this.sideLength = sideLength;
+					}
+
+					// Glue code
+					getArea () {
+						return this.#equilateralShape.getArea();
+					}
+				}
+			</code></pre>
+
+			<ul>
+				<li class="pro">Separate state</li>
+				<li class="pro">Separate inheritance chain</li>
+				<li class="yes">Private members</li>
+				<li class="no">Glue code tedious and not future proof</li>
+			</ul>
+		</div>
+	</article>
+
+	<article class="slide">
+		<h3>Prototype mutations</h3>
+
+		<div class="sbs">
+			<pre class="language-javascript"><code>
+				const EquilateralShape = {
+					getArea () {
+						const {sideLength, sides} = this;
+						return sides * sideLength ** 2 /
+							   (4 * Math.tan(Math.PI / sides));
+					}
+				};
+
+				class EquilateralTriangle extends Triangle {
+					sides = 3;
+
+					constructor (sideLength) {
+						super(sideLength, sideLength, sideLength);
+						this.sideLength = sideLength;
+					}
+				}
+
+				Object.assign(EquilateralTriangle.prototype, EquilateralShape);
+
+				(new EquilateralTriangle(4)).getArea(); // 6.93
+			</code></pre>
+
+			<ul>
+				<li class="pro">Flexible</li>
+				<li class="pro">Transparent</li>
+				<li class="no">No private members</li>
+				<li class="no">No <code>instanceof</code> checks</li>
+			</ul>
+		</div>
+	</article>
+
+	<article class="slide">
+		<h3>Instance mutations</h3>
+
+		<div class="sbs">
+			<pre class="language-javascript"><code>
+				const EquilateralShape = {
+					getArea () {
+						const {sideLength, sides} = this;
+						return sides * sideLength ** 2 /
+							   (4 * Math.tan(Math.PI / sides));
+					}
+				};
+
+				class EquilateralTriangle extends Triangle {
+					sides = 3;
+
+					constructor (sideLength) {
+						super(sideLength, sideLength, sideLength);
+						this.sideLength = sideLength;
+						Object.assign(this, EquilateralShape);
+					}
+				}
+
+				(new EquilateralTriangle(4)).getArea(); // 6.93
+			</code></pre>
+
+			<ul>
+				<li class="pro">Flexible</li>
+				<li class="pro">Transparent</li>
+				<li class="con">Inefficient</li>
+				<li class="no">No introspection</li>
+			</ul>
+		</div>
+	</article>
+</section>
+
+<section>
+	<header class="slide">
+		<h2>TC39 Stage 1+ proposals</h2>
+	</header>
+
+	<article class="slide">
+		<header>
+			<h3>First-class protocols</h3>
+			<a href="https://github.com/tc39/proposal-first-class-protocols" class="subtitle">tc39/proposal-first-class-protocols</a>
+		</header>
+
+		<div class="sbs">
+			<pre class="language-javascript"><code>
+				protocol EquilateralShape {
+					sideLength;
+					sides;
+
+					getArea () {
+						let sides = this[EquilateralShape.sides];
+						let sideLength = this[EquilateralShape.sideLength];
+						return sides * sideLength ** 2 /
+						       (4 * Math.tan(Math.PI / sides));
+					}
+				}
+
+				class EquilateralTriangle extends Triangle {
+					[EquilateralShape.sides] = 3;
+
+					constructor (sideLength) {
+						super(sideLength, sideLength, sideLength);
+						this[EquilateralShape.sideLength] = sideLength;
+					}
+
+					getArea () {
+						return this[EquilateralShape.getArea]();
+					}
+				}
+				Protocol.implement(EquilateralTriangle, EquilateralShape);
+
+				(new EquilateralTriangle(4)).getArea(); // 6.93
+			</code></pre>
+			<ul>
+				<li class="pro">Avoids conflicts via symbols</li>
+				<li class="pro">Can be applied post-hoc</li>
+				<li class="con">Duplicated author intent → error conditions</li>
+				<li class="con">Manual glue code</li>
+				<li class="con">Often criticized for ergonomics</li>
+			</ul>
+		</div>
+	</article>
+
+	<article class="slide">
+		<header>
+			<h3>Maximally minimal mixins</h3>
+			<a class="subtitle" href="https://github.com/tc39/proposal-mixins">tc39/proposal-mixins</a>
+		</header>
+
+
+		<div class="sbs">
+			<pre class="language-javascript"><code>
+				mixin EquilateralShape {
+					getArea () {
+						const {sideLength, sides} = this;
+						return sides * sideLength ** 2 /
+						       (4 * Math.tan(Math.PI / sides));
+					}
+				}
+
+				class EquilateralTriangle extends Triangle with EquilateralShape {
+					sides = 3;
+
+					constructor (sideLength) {
+						super(sideLength, sideLength, sideLength);
+						this.sideLength = sideLength;
+					}
+				}
+
+				(new EquilateralTriangle(4)).getArea(); // 6.93
+			</code></pre>
+			<ul>
+				<li class="pro">Can add API surface AND provides control over conflicts</li>
+				<li class="pro"><code>super</code> works</li>
+				<li class="pro">Private members</li>
+				<li class="pro">Easy to implement</li>
+				<li class="con">Inheritance chain pollution</li>
+				<li class="con">Class definition time only</li>
+			</ul>
+		</div>
+	</article>
+
+	<article class="slide">
+		<header>
+			<h3>Decorators</h3>
+			<a class="subtitle" href="https://github.com/tc39/proposal-decorators">tc39/proposal-decorators</a>
+		</header>
+
+		<div class="sbs">
+			<pre class="language-javascript"><code>
+				@EquilateralShape
+				class EquilateralTriangle extends Triangle {
+					sides = 3;
+
+					constructor (sideLength) {
+						super(sideLength, sideLength, sideLength);
+						this.sideLength = sideLength;
+					}
+				}
+			</code></pre>
+			<span class="emoji delayed">😍</span>
+		</div>
+	</article>
+	<article class="slide">
+		<header>
+			<h3>Peeking behind the curtain</h3>
+			<p class="subtitle delayed" data-index="2">Same patterns, just better encapsulated</p>
+		</header>
+
+		<div class="sbs">
+			<pre class="language-javascript"><code>
+				function EquilateralShape (Class, context) {
+					return class extends Class {
+						getArea () {
+							if (super.getArea) {
+								return super.getArea();
+							}
+
+							const {sideLength, sides} = this;
+							return sides * sideLength ** 2 /
+								   (4 * Math.tan(Math.PI / sides));
+						}
+					}
+				}
+			</code></pre>
+			<pre class="language-javascript delayed" data-index="1"><code>
+				function EquilateralShape (Class, context) {
+					Class.prototype.getArea = function() {
+						const {sideLength, sides} = this;
+						return sides * sideLength ** 2 /
+							   (4 * Math.tan(Math.PI / sides));
+					};
+				}
+			</code></pre>
+		</div>
+
+	</article>
+
+
+</section>
+
+<article class="slide md">
+	## Priority of constituencies
+
+	- Consumers > producers
+	- Host class author > Mixin author > Platform implementers
+
+	<details class="notes md">
+		- Web platform's [priority of constituencies](https://www.w3.org/TR/design-principles/#priority-of-constituencies)
+		- [Consumers > producers](https://lea.verou.me/blog/2025/user-effort/#consumers-over-producers)
+	</details>
+</article>
+
+<article class="slide md">
+	## Requirements
+
+	- Extend API surface of host class
+	- Memory efficient (prototypes > instances)
+	- Static introspection (`A` uses `M1`?)
+	- Encapsulation
+</article>
+
+<article class="slide md">
+	## Nice to haves
+
+	- Single declaration of intent
+	- Instance introspection (`instanceof`)
+</article>
+
+<article class="slide md">
+	## Hairiest issues 🪮
+
+	- Is post-hoc composition desirable?
+	- Should private members be shared?
+	- Naming conflicts: explicit vs. implicit
+	- Function composition: explicit vs. implicit
+</article>
+
+<section>
+	<header class="slide">
+		<h1>Design space</h1>
+	</header>
+
+
+</section>
+
+<section>
+	<header class="slide">
+		<h1>How can we make progress?</h1>
+	</header>
+
+	<article class="slide md">
+		## Different use cases, different primitives?
+
+		- Tightly coupled use cases don't need sophisticated conflict management
+		- Tightly coupled use cases don't need post-hoc application
+		- Most controversy is around loosely coupled use cases
+	</article>
+
+	<article class="slide md">
+		## Proposed path forwards
+
+		- High-level primitives for tightly coupled use cases: Class spread syntax
+		- Low-level primitives for decoupled use cases: Make userland helpers easier
+	</article>
+</section>
+
+<section>
+	<header class="slide">
+		<h2>Class spread syntax</h2>
+	</header>
+
+	<article class="slide md">
+		### Core idea
+
+		- Bring spread syntax to class definitions
+		- Low-level semantics, no-one expects sophisticated MRO
+	</article>
+
+	<article class="slide">
+		<header>
+			<h3>Core idea</h3>
+			<p class="subtitle">Spread class → class</p>
+		</header>
+
+		<pre class="language-javascript"><code>
+			class EquilateralShape {
+				getArea () {
+					const {sideLength, sides} = this;
+					return sides * sideLength ** 2 /
+						   (4 * Math.tan(Math.PI / sides));
+				}
+			}
+
+			class EquilateralTriangle extends Triangle {
+				sides = 3;
+
+				constructor (sideLength) {
+					super(sideLength, sideLength, sideLength);
+					this.sideLength = sideLength;
+				}
+
+				...EquilateralShape
+			}
+
+			(new EquilateralTriangle(4)).getArea(); // 6.93
+		</code></pre>
+	</article>
+
+	<article class="slide md">
+		### Core idea
+
+		<div class="sbs">
+			```js
+			// m1.js
+			export default class M1 {
+				// ...
+			}
+			```
+			```js
+			// methods.js
+			export function foo() {
+				doSomething(this);
+			}
+			```
+			```js
+			// a.js
+			import M1 from "./m1.js";
+			import * as methods from "./methods.js";
+
+			class A {
+				...M1
+				...{prototype: methods}
+			}
+		</div>
+	</article>
+
+	<article class="slide md">
+		### Goals
+
+		- Make tightly coupled use cases easier
+		- No conflict handling
+	</article>
+</section>
+
+<section>
+	<header class="slide">
+		<h2>Class fields introspection</h2>
+	</header>
+
+	<article class="slide md">
+		### Core idea
+
+		- Public fields are part of the class's API surface
+		- Static fields can be introspected, but not instance fields
+		- _"Just create an instance"_ → But side effects!
+	</article>
+
+	<article class="slide md">
+		## Hairiest issues 🪮
+
+		- What about private fields?
+		- What about `super`?
+	</article>
+</section>
+
+</body>
