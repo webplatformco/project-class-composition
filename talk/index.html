@@ -16,7 +16,7 @@
 	</h1>
 	<h2>Past, present, and future</h2>
 	<footer>
-		Lea Verou (OpenJS)
+		Lea Verou (OpenJS, Web Platform Collective)
 	</footer>
 </header>
 
@@ -28,18 +28,24 @@
 </article>
 
 <article class="slide md">
-	## Needs
+	<header>
+		## Use cases
+		<p class="subtitle">Class composition beyond inheritance</p>
+	</header>
 
-	- Modularity
-	- Better data modeling (_is a_ vs. _has a_)
-	- Coupling: Tightly vs. loosely coupled
-	- Type: Identity vs. trait/behavior
+	- Modularity of class definitions
+	- Polymorphism (procedural & OOP flavors of the same functions)
+	- Better data modeling for traits/behaviors (_has a_ vs _is a_)
+	- Support true multiple inheritance cases better
+	- Transparent composition
 
 	<details class="notes">
 		The use cases for multiple inheritance are well-established in the literature.
-		On a high level, there are two distinct high-level needs:
+		On a high level, they fall into the following categories:
+
 		- Modularity for class definitions. Procedural APIs can be broken down into multiple modules, but the story is not quite as smooth for class surface.
 		- Better data modeling: Support modeling _has a_ or _does a_ relationships distinctly from _is a_ relationships.
+		- Transparent composition (the inheritance chain is observable to the outside)
 	</details>
 </article>
 
@@ -255,7 +261,134 @@
 			</code></pre>
 		</section>
 	</article>
+
+	<article class="slide">
+		<h3>Haskell Typeclasses</h3>
+		<pre class="language-haskell"><code>
+			class M1 a where
+				m1 :: a -> a
+			class M2 a where
+				m2 :: a -> a
+			class A a where
+				a :: a -> a
+
+			class A a where
+				a :: a -> a deriving (M1, M2)
+		</code></pre>
+	</article>
 </section>
+
+
+<article class="slide columns-2 dont-resize">
+	<h2>Diamond problem?</h2>
+
+	<img src="images/diamond.svg" alt="Shape">
+
+	<div class="md">
+		```js
+		let t = new EquilateralTriangle(4);
+		t.getArea(); // which one?
+		```
+
+		- Limited in JS, as **no stateful subinstances** like C++
+		- Most discourse about the _deadly diamond of death_ is actually around **conflict resolution / MRO**
+		- Diamond issues can still come up around **method call duplication**
+	</div>
+	<details class="notes">
+		- Conflict resolution is orthogonal to diamond inheritance.
+		- Diamond issues when you have something like `super`.
+	</details>
+</article>
+
+<article class="slide">
+	<header>
+		<h2>Diamond problem in JS</h2>
+		<p class="subtitle">With naïve multiple inheritance</p>
+	</header>
+
+	<div class="sbs start">
+		<pre><code>
+			class A {
+				constructor (n) {
+					this.n = n;
+					sideEffect();
+				}
+			}
+
+
+		</code></pre>
+		<pre><code>
+			class B extends A {
+				constructor () {
+					super(1);
+				}
+			}
+			class C extends A {
+				constructor () {
+					super(2);
+				}
+			}
+		</code></pre>
+		<pre><code>
+			class D extends B, C {
+				constructor () {
+					super();
+				}
+			}
+
+			(new D()).n; // ???
+			// sideEffect() 1x or 2x?
+		</code></pre>
+	</div>
+
+	<details class="notes">
+		- Conflict resolution is orthogonal to diamond inheritance.
+		- Diamond issues when you have something like `super`.
+	</details>
+</article>
+
+<article class="slide">
+	<h2>Single inheritance MRO</h2>
+
+	<div class="sbs">
+		<section>
+			<h3>Default: Subclass overrides superclass</h3>
+			<pre class="language-javascript"><code>
+				class A {
+					foo () { console.log("A") }
+				}
+				class B extends A {
+					foo () { console.log("B") }
+				}
+
+				new B(); // "B"
+			</code></pre>
+		</section>
+		<section>
+			<h3 class="md">Subclass can use `super` to override</h3>
+			<pre class="language-javascript"><code>
+				class A {
+					foo () { console.log("A") }
+				}
+				class B extends A {
+					foo () {
+						super.foo();
+						console.log("B")
+					}
+				}
+			</code></pre>
+		</section>
+	</div>
+</article>
+
+<article class="slide md">
+	<h2>Multiple inheritance MRO</h2>
+
+	- Single inheritance chain distinct from traits/interfaces/mixins
+	- Linearization algorithms (usually C3)
+	- Error on conflicts, forcing disambiguation
+	- Renaming at host class
+</article>
 
 <section>
 	<header class="slide">
