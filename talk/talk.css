@@ -1,6 +1,5 @@
 @import url("https://webplatform.design/talks/common/theme.css") layer(theme);
 @import url("https://webplatform.design/talks/common/css/utils.css") layer(utils);
-@import url("https://talks.verou.me/api-design/css/components/arrows.css") layer(utils.arrows);
 
 @layer theme {
 	:where(a) {
@@ -70,9 +69,52 @@
 	.emoji {
 		font-size: calc(4 * var(--slide-base-font-size, 1rem));
 	}
+
+	.arrow-right {
+		--_arrow-inset: var(--arrow-inset, .4em);
+		--_arrow-head-length: var(--arrow-head-length, .8em);
+		--_arrow-body-length: calc(100% - var(--_arrow-head-length));
+		--_color: var(--color, var(--color-neutral-90));
+		background: var(--_color);
+
+		&:where(:empty) {
+			--_color: var(--color, var(--color-neutral-80));
+			--_arrow-inset: var(--arrow-inset, .3em);
+		}
+
+		flex-grow: 1;
+		flex-shrink: 0;
+		min-inline-size: max(1em, 1.6 * var(--_arrow-head-length));
+		padding-block: calc(.1em + var(--_arrow-inset));
+		padding-inline-end: calc(var(--_arrow-head-length) * .7);
+		margin-inline-end: -.3em;
+		margin-block: auto;
+
+		&:where(div) {
+
+		}
+
+
+
+		clip-path: polygon(
+			0 var(--_arrow-inset),
+			var(--_arrow-body-length) var(--_arrow-inset),
+			var(--_arrow-body-length) 0, 100% 50%,
+			var(--_arrow-body-length) 100%,
+			var(--_arrow-body-length) calc(100% - var(--_arrow-inset)),
+			0 calc(100% - var(--_arrow-inset))
+		);
+	}
 }
 
 .slide > h3 ~ section > h4 {
 	font-size: calc(2 * var(--slide-base-font-size, 1rem));
 	margin-block-start: 0;
+}
+
+.dumpster-fire {
+	background-image: linear-gradient(to bottom, hsl(0 0 100 / .8), hsl(0 0 100 / .97) 50%), url(images/dumpster-fire.svg), url(images/dumpster-fire.svg);
+	background-size: auto, 4em 4em, 4em 4em;
+	background-position: 0 0, 0 0, 2em 2em;
+	background-repeat: repeat;
 }

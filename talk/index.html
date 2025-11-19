@@ -21,11 +21,10 @@
 </header>
 
 <article class="slide md">
-	## ⚠️ Work In progress ⚠️
+	## ⚠️ Work In Progress ⚠️
 
 	These slides are a work in progress.
 	They will change, likely dramatically.
-	They're pushed to the repo for collaboration, not dissemnination.
 </article>
 
 <article class="slide md">
@@ -44,13 +43,13 @@
 	</details>
 </article>
 
-<article class="slide md">
+<!-- <article class="slide md">
 	## Variables
 
 	- What: State vs logic composition (+ 💠 Diamond problem)
 	- 🕒 When: Class definition time vs. post-hoc vs. instance creation time
 	- ✅ Contract: Requirements from host class
-</article>
+</article> -->
 
 <section>
 	<header class="slide">
@@ -1072,8 +1071,6 @@
 			When they need to run logic on property access or assignment, they use accessors.
 			When they don't, they use fields because that's the language abstraction that is available and hanging value properties on the prototype is usually nonsensical.
 			Other languages don't even expose such a distinction.
-
-
 		</details>
 	</article>
 
@@ -1082,8 +1079,6 @@
 			<h3>Public fields are class API</h3>
 			<p class="subtitle">Methods as fields</p>
 		</header>
-
-
 
 		<div class="sbs">
 			<pre class="yes"><code>
@@ -1105,11 +1100,77 @@
 		</details>
 	</article>
 
-	<article class="slide md">
-		## Hairiest issues 🪮
+	<article class="slide">
+		<h3>Strawman</h3>
 
-		- What about private fields?
+		<div class="sbs center">
+			<pre><code>
+				class A {
+					foo = 1;
+					static baz = 2;
+				}
+
+			</code></pre>
+			<code class="arrow-right">A[Symbol.publicFields]</code>
+			<pre><code>
+				[
+					{
+						name: "foo",
+						initializer(){
+							return 1;
+						}
+						static: false
+					},
+					{
+						name: "baz",
+						initializer(){
+							return 2;
+						}
+						static: true
+					}
+				]
+			</code></pre>
+			<ul>
+				<li>Frozen array</li>
+				<li>Properties non-writable, non-configurable</li>
+				<li><code>initializer</code> lazily evaluated when first accessed</li>
+			</ul>
+		</div>
+	</article>
+
+	<article class="dumpster-fire slide">
+		<h3>What about private fields?</h3>
+
+		<div class="sbs">
+			<section>
+				<h4><span class="badge">POV</span> Expose all fields</span></h4>
+
+				<ul>
+					<li>Can be obtained from [[SourceText]] already</li>
+					<li>Completeness</li>
+				</ul>
+			</section>
+			<section>
+				<h4><span class="badge">POV</span> Public fields only <span class="delayed">✅</span></h4>
+
+				<ul>
+					<li>Not part of the class API</li>
+					<li>What's the use case?</li>
+					<li>Can make progress faster</li>
+					<li><code>Symbol.publicFields</code> allows <code>Symbol.fields</code> to ship later</li>
+				</ul>
+			</section>
+		</div>
 	</article>
 </section>
+
+<footer class="slide md">
+	## Thank you!
+
+	Links:
+	- [github.com/webplatformco/project-class-composition](https://github.com/webplatformco/project-class-composition)
+	- [github.com/leaverou/proposal-class-spread](https://github.com/leaverou/proposal-class-spread)
+	- [github.com/leaverou/proposal-class-field-introspection](https://github.com/leaverou/proposal-class-field-introspection)
+</footer>
 
 </body>
