@@ -39,10 +39,10 @@
 		<p class="subtitle">Class composition beyond inheritance</p>
 	</header>
 
-	- Modularity of class definitions (logic AND API surface)
-	- Polymorphism (procedural & OOP flavors of the same functions)
+	- Modularity of class definitions
+	- Polymorphism
 	- Better data modeling for traits/behaviors (_has a_ vs _is a_)
-	- True multiple inheritance (e.g. `EquilateralTriangle` extends `Triangle` and `RegularPolygon`)
+	- True multiple inheritance
 	- Transparent composition
 
 	<details class="notes">
@@ -55,12 +55,76 @@
 	</details>
 </article>
 
-<article class="slide md">
-	## Example from the web platform: `EventTarget`
+<article class="slide">
+	<h3><div class="block badge">Use cases</div> Class modularity</h3>
 
-	- Capability, not identity
-	- Direct subclasses: `Node`, `Window`, `IDBRequest`, `AudioNode`, `AudioContext`
-	- `ArrayStream extends Array` → cannot make it an event target
+	<div class="sbs center">
+		<pre class="language-javascript"><code>
+			import tokenize from "./methods/tokenize.js";
+			import highlight from "./methods/highlight.js";
+			// ...
+
+			class Prism {
+				// constructor elided
+				tokenize (text, grammar) {
+					return tokenize.call(this, text, grammar);
+				}
+				highlight (text, language, options = {}) {
+					return highlight.call(this, text, language, options);
+				}
+				// ...
+			}
+		</code></pre>
+	</div>
+	<details class="notes">
+		- Large classes benefit from modularization for the same reason as procedural APIs.
+		Every method requires boilerplate to forward it to the method in the module.
+		Function signatures have to be duplicated for typing.
+		- This is a similified but real example from [Prism's v2 codebase](https://github.com/PrismJS/prism/blob/v2/src/core/classes/prism.js).
+		- [This Babel class](https://github.com/babel/babel/blob/main/packages/babel-traverse/src/path/index.ts) is even more egregious
+	</details>
+</article>
+
+<article class="slide" data-type="Use cases">
+	<h3><div class="block badge">Use cases</div> Procedural & OOP Polymorphism</h3>
+
+	<div class="sbs start">
+		<div>
+			<pre><div class="filename">mix.js</div><code>
+				export default function mix (color, color2) {
+					// elided
+				}
+			</code></pre>
+			<pre><div class="filename">toString.js</div><code>
+				export default function toString (color) {
+					// elided
+				}
+			</code></pre>
+		</div>
+		<pre><div class="filename">color.js</div><code>
+			import mix from "./mix.js";
+			import toString from "./toString.js";
+
+			class Color {
+				mix (color) {
+					return mix(this, color);
+				}
+				toString () {
+					return toString(this);
+				}
+			}
+		</code></pre>
+	</div>
+</article>
+
+<article class="slide md">
+	<h2>Example: `EventTarget`</h2>
+
+	<ul>
+		<li>Capability, not identity</li>
+		<li class="delayed md">Direct subclasses: `Node`, `Window`, `IDBRequest`, `AudioNode`, `AudioContext`</li>
+		<li class="delayed md">`ArrayStream extends Array` → cannot make it an event target</li>
+	</ul>
 </article>
 
 <section>
@@ -325,14 +389,16 @@
 
 		<div class="sbs">
 			<pre class="language-javascript"><code>
-				const RegularPolygon = S => class RegularPolygon extends S {
+				const RegularPolygon = S =>
+				class RegularPolygon extends S {
 					getArea () {
 						const {sideLength, sides} = this;
 						return sides * sideLength ** 2 /
-						       (4 * Math.tan(Math.PI / sides));
+							(4 * Math.tan(Math.PI / sides));
 					}
 				}
-
+			</code></pre>
+			<pre><code>
 				class EquilateralTriangle extends RegularPolygon(Triangle) {
 					sides = 3;
 
@@ -344,12 +410,16 @@
 
 				(new EquilateralTriangle(4)).getArea(); // 6.93
 			</code></pre>
-
+		</div>
+		<div class="sbs">
 			<ul>
 				<li class="pro"><code>super</code> works</li>
-				<li class="yes">Private members</li>
+				<li class="pro">Private members</li>
+			</ul>
+			<ul>
 				<li class="con">Affects inheritance chain</li>
-				<li class="no">No <code>instanceof</code> checks</li>
+				<li class="con">No <code>instanceof</code> checks</li>
+				<li class="con">Mixin class needs to support it</li>
 			</ul>
 		</div>
 	</article>
@@ -371,7 +441,8 @@
 						       (4 * Math.tan(Math.PI / sides));
 					}
 				}
-
+			</code></pre>
+			<pre><code>
 				class EquilateralTriangle extends Triangle {
 					#regularPolygon = new RegularPolygon(this.sideLength, 3);
 					constructor() {
@@ -384,17 +455,26 @@
 					}
 				}
 			</code></pre>
-
+		</div>
+		<div class="sbs">
 			<ul>
 				<li class="pro">Separate state</li>
 				<li class="pro">Separate inheritance chain</li>
-				<li class="yes">Private members</li>
-				<li class="no">Glue code tedious and not future proof</li>
+				<li class="pro">Private members</li>
+				<li class="pro">Mixin class does not need to be aware</li>
+			</ul>
+			<ul>
+				<li class="con">Glue code</li>
 			</ul>
 		</div>
+
 	</article>
 
-	<article class="slide">
+	<article class="slide" style="flex-flow: row; gap: 3rem">
+		<h2 style="text-align: right;">
+			<span class="badge">Example</span>
+			Custom form controls
+		</h2>
 		<pre><code>
 			class MyElement extends HTMLElement {
 				// This tells ElementInternals that this element is form associated
@@ -431,7 +511,8 @@
 							   (4 * Math.tan(Math.PI / sides));
 					}
 				};
-
+			</code></pre>
+			<pre><code>
 				class EquilateralTriangle extends Triangle {
 					sides = 3;
 
@@ -445,12 +526,15 @@
 
 				(new EquilateralTriangle(4)).getArea(); // 6.93
 			</code></pre>
-
+		</div>
+		<div class="sbs">
 			<ul>
 				<li class="pro">Flexible</li>
 				<li class="pro">Transparent</li>
-				<li class="no">No private members</li>
-				<li class="no">No <code>instanceof</code> checks</li>
+			</ul>
+			<ul>
+				<li class="con">No private members</li>
+				<li class="con">No <code>instanceof</code> checks</li>
 			</ul>
 		</div>
 	</article>
@@ -467,7 +551,8 @@
 							   (4 * Math.tan(Math.PI / sides));
 					}
 				};
-
+			</code></pre>
+			<pre><code>
 				class EquilateralTriangle extends Triangle {
 					sides = 3;
 
@@ -481,11 +566,15 @@
 				(new EquilateralTriangle(4)).getArea(); // 6.93
 			</code></pre>
 
+		</div>
+		<div class="sbs">
 			<ul>
 				<li class="pro">Flexible</li>
 				<li class="pro">Transparent</li>
+			</ul>
+			<ul>
 				<li class="con">Inefficient</li>
-				<li class="no">No introspection</li>
+				<li class="con">No introspection</li>
 			</ul>
 		</div>
 	</article>
@@ -845,6 +934,7 @@
 		## Hairiest issues 🪮
 
 		- Is post-hoc composition desirable?
+		- Should the mixin class need to opt-in?
 		- Private members
 		- Naming conflicts: explicit vs. implicit
 		- Function composition: explicit vs. implicit
@@ -1047,7 +1137,7 @@
 							return toString(this);
 						}
 					}
-				</code>
+				</code></pre>
 			</div>
 			<div class="arrow-right"></div>
 			<div>

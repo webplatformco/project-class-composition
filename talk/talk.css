@@ -13,6 +13,10 @@
 	}
 }
 
+.sbs + .sbs {
+	margin-block-start: 2rem;
+}
+
 @layer utils {
 	.type {
 		position: absolute;
