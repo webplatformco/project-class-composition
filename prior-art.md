@@ -196,16 +196,12 @@ but make no distinction between identity and behavior, it's just superclasses al
 Python doesn’t have an explicit mixin concept,
 but supports multiple inheritance:
 ```python
-class A:
-	def f(self): print("A")
-
 class M1:
-	def f(self): print("M1")
+	def foo(self): print("M1")
 
-class M2:
-	def f(self): print("M2")
+# M2, M3 elided
 
-class B(A, M1, M2):
+class A(M1, M2, M3):
 	pass
 ```
 
@@ -216,9 +212,18 @@ Notes:
 #### C++
 
 ```cpp
- class M1 {};
- class M2 {};
- class A : public M1, public M2 {};
+class M1 {
+public:
+	void foo() { std::cout << "M1"; }
+};
+
+// M2, M3 elided
+
+class A : public M1,
+          public M2,
+          public M3 {
+	// ...
+};
 ```
 
 #### Eiffel
@@ -227,31 +232,31 @@ Apparently one of the most elegant solutions for multiple inheritance.
 
 ```eiffel
 class M1
-
-  feature f do
-		print ("M1 f%N")
-  end
+	feature foo do print("M1") end
 end
 
+-- M2, M3 elided
 
-class M2
-  feature f do
-		print ("M2 f%N")
-  end
-end
-
-
-class A
-  inherit M1
-      rename
-        f as f_from_a
-      end
-    M2
+class A inherit M1 M2 M3
+	-- ...
 end
 ```
 
 - Supports renaming at the point of inclusion. Any references to the renamed method in the original class continue to work.
 - No generic `super`; `Precursor` must specify which superclass to use (e.g. `Precursor {M1}`)
+
+#### CLOS
+
+```lisp
+(defclass m1 () ())
+
+(defmethod foo ((x m1))
+  (format t "M1~%"))
+
+; m2, m3 elided
+
+(defclass a (m1 m2 m3) ())
+```
 
 
 ### Partials
@@ -265,22 +270,32 @@ TBD
 #### [PHP traits](https://www.php.net/manual/en/language.oop5.traits.php)
 
 ```php
-trait M1 {}
-trait M2 {}
+trait M1 {
+	public function foo() {
+		echo "M1";
+	}
+}
 
-class A
-{
-    use M1, M2;
-    // ...
+// M2, M3 elided
+
+class A extends B {
+	use M1, M2, M3;
+	// ...
 }
 ```
 
 #### [Dart mixins](https://dart.dev/language/mixins)
 
 ```dart
-mixin M1 {}
-mixin M2 {}
-class A extends B with M1, M2 {}
+mixin M1 {
+	void foo() { print("M1"); }
+}
+
+// M2, M3 elided
+
+class A extends B with M1, M2, M3 {
+	// ...
+}
 ```
 
 Notes:
@@ -290,25 +305,19 @@ Notes:
 #### [Rust traits](https://doc.rust-lang.org/book/ch10-02-traits.html) { #rust-traits }
 
 ```rust
-pub trait Summary {
-    fn summarize(&self) -> String;
+pub trait M1 {
+	fn foo(&self) { println!("M1"); }
 }
 
-impl Summary for NewsArticle {
-    fn summarize(&self) -> String {
-        format!("{}, by {} ({})", self.headline, self.author, self.location)
-    }
-}
-```
+// M2, M3 elided
 
-```rust
-pub trait Summary {
-    fn summarize(&self) -> String  {
-      String::from("(Read more...)");
-    }
-}
+// no way to do extends B,
+// only composition or delegation
+struct A;
 
-impl Summary for NewsArticle {}
+impl M1 for A {}
+impl M2 for A {}
+impl M3 for A {}
 ```
 
 Notes:
@@ -328,9 +337,15 @@ class A: B, M1, M2 {
 #### [Scala traits](https://docs.scala-lang.org/tour/traits.html)
 
 ```scala
-trait M1 {}
-trait M2 {}
-class A extends B with M1, M2 {}
+trait M1 {
+	def foo: String = "M1"
+}
+
+// M2, M3 elided
+
+class A extends B with M1 with M2 with M3 {
+	// ...
+}
 ```
 
 Classes can extend one superclass, but can have multiple traits,
@@ -359,14 +374,14 @@ Notes:
 
 ```haskell
 class M1 a where
-    m1 :: a -> a
+	m1 :: a -> a
 class M2 a where
-    m2 :: a -> a
+	m2 :: a -> a
 class A a where
-    a :: a -> a
+	a :: a -> a
 
 class A a where
-    a :: a -> a deriving (M1, M2)
+	a :: a -> a deriving (M1, M2)
 ```
 
 #### [Java 8+ interfaces](https://docs.oracle.com/javase/tutorial/java/concepts/interface.html)
@@ -376,16 +391,15 @@ As a result, superclass methods take precedence over interface methods.
 
 ```java
 interface M1 {
-    default void m1() {
-      System.out.println("M1");
-    }
-}
-interface M2 {
-    void m2(); // abstract
+	default void foo() {
+		System.out.println("M1");
+	}
 }
 
-class A implements M1, M2 {
-  // ...
+// M2, M3 elided
+
+class A extends B implements M1, M2, M3 {
+	// ...
 }
 ```
 
@@ -397,18 +411,50 @@ Notes:
   - If two interfaces define a default method with the same signature, the class must explicitly override that method to resolve the ambiguity, otherwise compilation fails.
   - Superclasses take precedence over interfaces.
 
+#### C# interfaces
+
+```csharp
+interface M1 {
+	void foo() { Console.WriteLine("M1"); }
+}
+
+// M2, M3 elided
+
+
+class A extends B implements M1, M2, M3 {
+	// ...
+}
+```
+
+#### Kotlin interfaces
+
+```kotlin
+interface M1 {
+	fun foo() { println("M1"); }
+}
+
+// M2, M3 elided
+
+class A : B(), M1, M2, M3 {
+	// ...
+}
+```
 
 #### [Ruby mixins](https://www.ruby-lang.org/en/documentation/ruby-from-other-languages/mixin-module/)
 
 ```ruby
 module M1
-    def m1
-        puts "M1"
-    end
+	def foo
+		puts "M1"
+	end
 end
 
-class A
-  include M1
+# M2, M3 elided
+
+class A < B
+	include M1
+	include M2
+	include M3
 end
 ```
 
@@ -417,3 +463,17 @@ Notes:
 - Despite being specified anywhere in the class body, their placement does not affect precedence order.
 - `super` resolves to the same _method_ up the chain (which may come from a module or a superclass)
 - In terms of precedence order, modules sit between the implementing class and its superclass. `prepend` can change that.
+
+#### Groovy mixins
+
+```groovy
+class M1 {
+	def foo() { println "M1" }
+}
+
+// M2, M3 elided
+
+class A extends B {}
+
+A.metaClass.mixin M1, M2, M3
+```
